@@ -1,3 +1,642 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ANUS VPN</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121a;
+    --border: #1e1e2e;
+    --green: #00ff88;
+    --red: #ff3366;
+    --purple: #a855f7;
+    --blue: #3b82f6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Частицы ── */
+  #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute; width: 2px; height: 2px;
+    border-radius: 50%; animation: float linear infinite; opacity: 0;
+  }
+  @keyframes float {
+    0%   { transform: translateY(100vh); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(-10vh) translateX(30px); opacity: 0; }
+  }
+
+  .container { position: relative; z-index: 1; max-width: 420px; margin: 0 auto; padding: 20px 16px 100px; }
+
+  /* ── Шапка ── */
+  .header { text-align: center; padding: 20px 0 16px; }
+  .logo { font-size: 48px; animation: pulse-logo 3s ease-in-out infinite; display: block; margin-bottom: 8px; }
+  @keyframes pulse-logo {
+    0%, 100% { filter: drop-shadow(0 0 8px #00ff88); transform: scale(1); }
+    50%       { filter: drop-shadow(0 0 24px #00ff88); transform: scale(1.05); }
+  }
+  .brand {
+    font-size: 26px; font-weight: 900; letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--green), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .tagline { font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: 1px; }
+
+  /* ── Карточка ── */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 20px; margin-bottom: 12px;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent); opacity: 0.4;
+  }
+
+  /* ── Статус ── */
+  .status-card { text-align: center; padding: 24px 20px; }
+  .status-indicator {
+    width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; position: relative; transition: all 0.5s ease;
+  }
+  .status-indicator.off { background: rgba(255,51,102,0.1); border: 2px solid var(--red); box-shadow: 0 0 20px rgba(255,51,102,0.2); }
+  .status-indicator.on  { background: rgba(0,255,136,0.1);  border: 2px solid var(--green); animation: glow-ring 2s ease-in-out infinite; }
+  @keyframes glow-ring {
+    0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+    50%       { box-shadow: 0 0 40px rgba(0,255,136,0.6), 0 0 60px rgba(0,255,136,0.2); }
+  }
+  .ring {
+    position: absolute; inset: -8px; border-radius: 50%;
+    border: 1px solid var(--green); opacity: 0;
+    animation: ring-pulse 2s ease-out infinite;
+  }
+  .ring:nth-child(2) { animation-delay: 0.7s; }
+  @keyframes ring-pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+
+  .status-label { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .status-label.off { color: var(--red); }
+  .status-label.on  { color: var(--green); }
+  .status-sub { font-size: 12px; color: var(--muted); }
+
+  .btn-connect {
+    width: 100%; padding: 16px; border-radius: 14px; border: none;
+    font-size: 16px; font-weight: 700; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.3s ease; margin-top: 16px;
+    position: relative; overflow: hidden;
+  }
+  .btn-connect.off { background: linear-gradient(135deg, #00ff88, #00cc6a); color: #000; box-shadow: 0 4px 20px rgba(0,255,136,0.3); }
+  .btn-connect.on  { background: linear-gradient(135deg, #ff3366, #cc0044); color: #fff; box-shadow: 0 4px 20px rgba(255,51,102,0.3); }
+  .btn-connect:active { transform: scale(0.97); }
+
+  /* ── Статистика ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+  .stat-icon { font-size: 20px; margin-bottom: 4px; }
+  .stat-value { font-size: 15px; font-weight: 700; color: var(--green); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Серверы ── */
+  .card-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .server-list { display: flex; flex-direction: column; gap: 8px; }
+  .server-item {
+    display: flex; align-items: center; padding: 12px 14px;
+    border-radius: 12px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02); cursor: pointer; transition: all 0.2s ease; gap: 10px;
+  }
+  .server-item:active { transform: scale(0.98); background: rgba(168,85,247,0.08); }
+  .server-item.active { border-color: var(--green); background: rgba(0,255,136,0.06); }
+  .server-flag { font-size: 22px; flex-shrink: 0; }
+  .server-info { flex: 1; }
+  .server-name { font-size: 13px; font-weight: 600; }
+  .server-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .server-ping { font-size: 11px; font-weight: 700; color: var(--green); flex-shrink: 0; }
+  .server-ping.bad { color: var(--red); }
+
+  /* ════════════════════════════════════
+     ВИДЕО-РЕКЛАМА
+  ════════════════════════════════════ */
+  .ad-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #000;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .ad-overlay.show { opacity: 1; pointer-events: all; }
+
+  /* Верхний бейдж */
+  .ad-top-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    z-index: 2;
+  }
+  .ad-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--purple);
+    border: 1px solid var(--purple); border-radius: 4px; padding: 3px 8px; text-transform: uppercase;
+  }
+  .ad-skip-timer {
+    font-size: 13px; font-weight: 700;
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+    border-radius: 20px; padding: 4px 12px; color: #fff;
+  }
+
+  /* Видео */
+  #adVideo {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    background: #000;
+  }
+
+  /* Нижняя панель рекламы */
+  .ad-bottom-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 16px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    z-index: 2;
+  }
+  .btn-skip {
+    width: 100%; padding: 13px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+    color: #fff; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-skip:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-skip:not(:disabled):active { transform: scale(0.97); background: rgba(255,255,255,0.2); }
+
+  /* Заглушка — если нет видео */
+  .ad-fallback {
+    display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+    text-align: center; padding: 32px;
+  }
+  .ad-fallback.show { display: flex; }
+  .ad-fallback-emoji { font-size: 72px; margin-bottom: 16px; animation: bounce 0.8s ease-in-out infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+  .ad-fallback-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .ad-fallback-text  { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Прогресс бар рекламы */
+  .ad-progress {
+    position: absolute; bottom: 72px; left: 16px; right: 16px;
+    height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; z-index: 2;
+  }
+  .ad-progress-fill {
+    height: 100%; background: var(--green); border-radius: 2px;
+    width: 0%; transition: width 0.1s linear;
+  }
+
+  /* ── Навигация ── */
+  .nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(10,10,15,0.96); backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    padding: 8px 0 env(safe-area-inset-bottom, 8px); z-index: 50;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px; cursor: pointer; font-size: 10px; color: var(--muted); transition: color 0.2s;
+  }
+  .nav-item .icon { font-size: 22px; }
+  .nav-item.active { color: var(--green); }
+
+  /* ── Тост ── */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: rgba(0,255,136,0.12); border: 1px solid var(--green); color: var(--green);
+    padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 600;
+    white-space: nowrap; z-index: 200; pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Премиум */
+  .perk { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<!-- ════════ ВИДЕО-РЕКЛАМА ════════ -->
+<div class="ad-overlay" id="adOverlay">
+
+  <!-- Верх -->
+  <div class="ad-top-bar">
+    <div class="ad-badge">📺 Реклама</div>
+    <div class="ad-skip-timer" id="adTimer">⏳ 5</div>
+  </div>
+
+  <!-- Видео -->
+  <video id="adVideo" playsinline autoplay muted style="max-height:100%;max-width:100%;"></video>
+
+  <!-- Image ad -->
+  <img id="adImage" style="display:none;max-width:100%;max-height:100%;object-fit:contain;" />
+
+  <!-- Заглушка (если нет видео) -->
+  <div class="ad-fallback" id="adFallback">
+    <div class="ad-fallback-emoji" id="fallbackEmoji">🍺</div>
+    <div class="ad-fallback-title" id="fallbackTitle">Балтика №9</div>
+    <div class="ad-fallback-text" id="fallbackText">Когда тебе уже всё равно, к какому серверу подключаться</div>
+  </div>
+
+  <!-- Прогресс -->
+  <div class="ad-progress"><div class="ad-progress-fill" id="adProgress"></div></div>
+
+  <!-- Низ -->
+  <div class="ad-bottom-bar">
+    <button class="btn-skip" id="btnSkip" disabled onclick="closeAd()">
+      ⏭ Пропустить рекламу
+    </button>
+  </div>
+</div>
+
+<!-- Тост -->
+<div class="toast" id="toast"></div>
+
+<!-- Контент -->
+<div class="container">
+
+  <!-- Главная -->
+  <section class="section active" id="pageMain">
+    <div class="header">
+      <span class="logo">💨</span>
+      <div class="brand">ANUS VPN</div>
+      <div class="tagline">АНОНИМНОСТЬ · НАДЁЖНОСТЬ · УС (НЕТ)</div>
+    </div>
+
+    <div class="card status-card">
+      <div class="status-indicator off" id="statusIndicator">
+        <div class="ring"></div><div class="ring"></div>
+        <span id="statusIcon">🔴</span>
+      </div>
+      <div class="status-label off" id="statusLabel">НЕ ПОДКЛЮЧЁН</div>
+      <div class="status-sub" id="statusSub">Провайдер видит всё 👁️</div>
+      <button class="btn-connect off" id="btnConnect" onclick="handleConnect()">🔌 ПОДКЛЮЧИТЬСЯ</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Статистика сессии</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon">📡</div>
+          <div class="stat-value" id="statPing">—</div>
+          <div class="stat-label">Пинг</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">⬇️</div>
+          <div class="stat-value" id="statDown">—</div>
+          <div class="stat-label">Скачано</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">🕵️</div>
+          <div class="stat-value" id="statBlocked">—</div>
+          <div class="stat-label">Слежек блок.</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">🌐</div>
+          <div class="stat-value" id="statIP" style="font-size:12px">—.—.—.—</div>
+          <div class="stat-label">Твой IP</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Серверы -->
+  <section class="section" id="pageServers">
+    <div class="header" style="padding: 16px 0 12px;">
+      <div class="brand" style="font-size: 20px;">🌍 СЕРВЕРЫ</div>
+      <div class="tagline">Все одинаково медленные</div>
+    </div>
+    <div class="card">
+      <div class="server-list" id="serverList"></div>
+    </div>
+  </section>
+
+  <!-- Премиум -->
+  <section class="section" id="pagePremium">
+    <div class="header" style="padding: 16px 0 12px;">
+      <div class="brand" style="font-size: 20px;">💎 ПРЕМИУМ</div>
+      <div class="tagline">Та же хрень, но дороже</div>
+    </div>
+    <div class="card" style="text-align:center; padding: 28px 20px;">
+      <div style="font-size: 52px; margin-bottom: 12px;">💎</div>
+      <div style="font-size: 22px; font-weight: 800; margin-bottom: 6px; background: linear-gradient(135deg, #a855f7, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">ANUS VPN PREMIUM</div>
+      <div style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">999₽ / месяц (не платить)</div>
+      <div style="display:flex; flex-direction:column; gap:10px; text-align:left; margin-bottom:24px;">
+        <div class="perk">✅ <span>Тот же VPN что и бесплатно</span></div>
+        <div class="perk">✅ <span>Золотая иконка 💎 (в нашей голове)</span></div>
+        <div class="perk">✅ <span>Реклама пива → реклама вина 🍷</span></div>
+        <div class="perk">✅ <span>Сервер «Под диваном у Пети PREMIUM»</span></div>
+        <div class="perk">✅ <span>Сертификат «Настоящий Аноним» (PDF)</span></div>
+        <div class="perk">✅ <span>Наша вечная благодарность</span></div>
+      </div>
+      <button onclick="buyPremium()" style="width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(135deg,#a855f7,#3b82f6);color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;">
+        💳 КУПИТЬ (не работает)
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;">P.S. Мы всё равно ведём логи. Но красивые.</div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Навигация -->
+<nav class="nav">
+  <div class="nav-item active" id="navMain" onclick="showPage('main')"><span class="icon">🏠</span><span>Главная</span></div>
+  <div class="nav-item" id="navServers" onclick="showPage('servers')"><span class="icon">🌍</span><span>Серверы</span></div>
+  <div class="nav-item" id="navPremium" onclick="showPage('premium')"><span class="icon">💎</span><span>Премиум</span></div>
+</nav>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#0a0a0f'); tg.setBackgroundColor('#0a0a0f'); }
+
+// ════════════════════════════════════════════════
+//  📁 ДОБАВЛЯЙ СЮДА СВОИ ВИДЕО
+//  Кидай файлы в папку webapp/media/
+//  и просто добавляй имена в этот список:
+// ════════════════════════════════════════════════
+// video/mov = воспроизводится как видео
+// jpg/png/gif = показывается как картинка
+const ADS_VIDEOS = [
+  "https://files.catbox.moe/pd2afi.MOV",
+  "https://files.catbox.moe/ir2g3u.mp4",
+  "https://files.catbox.moe/fgccmh.mp4",
+  "https://files.catbox.moe/x4e085.jpg",
+];
+
+// Заглушки (показываются если нет видео или видео не загрузилось)
+const ADS_FALLBACK = [
+  { emoji: '🍺', title: 'Балтика №9', text: 'Когда тебе уже всё равно, к какому серверу подключаться' },
+  { emoji: '🍕', title: 'Пицца «Аноним»', text: 'Доставим так быстро, что ФСБ не успеет!\nКурьер в балаклаве. Всегда.' },
+  { emoji: '🚗', title: 'Такси «Анонимус»', text: 'Водитель не знает куда едет. Ты тоже.\nGPS отключён по соображениям приватности.' },
+  { emoji: '🧦', title: 'Носки «Инкогнито»', text: 'Тебя не видно, но запах остался.' },
+  { emoji: '💊', title: 'Антидепрессанты «Подключись»', text: 'Когда VPN не помогает — поможем мы!' },
+  { emoji: '🐔', title: 'КФК — Конспиративная Fried Курица', text: 'Соус — государственная тайна. Полковник Сандерс был агентом ЦРУ.' },
+];
+
+// ── Серверы ──
+const SERVERS = [
+  { flag: '🇷🇺', name: 'Москва', desc: 'Под диваном у Пети', ping: 12, bad: false },
+  { flag: '🇩🇪', name: 'Германия', desc: 'Холодильник Ганса', ping: 42, bad: false },
+  { flag: '🇺🇸', name: 'США', desc: 'Гараж дяди Боба', ping: 89, bad: false },
+  { flag: '🇯🇵', name: 'Япония', desc: 'Аниме-сервер 18+', ping: 134, bad: false },
+  { flag: '🏴‍☠️', name: 'Сомали', desc: 'Пиратский маршрутизатор', ping: 420, bad: true },
+  { flag: '🇰🇵', name: 'Сев. Корея', desc: 'Единственный сервер', ping: 1337, bad: true },
+  { flag: '🌍', name: 'Антарктида', desc: 'Пингвины держат', ping: 9999, bad: true },
+  { flag: '🌀', name: 'Параллельная вселенная', desc: 'Нестабильно', ping: -4, bad: false },
+];
+
+let isConnected = false;
+let selectedServer = 0;
+let statsInterval = null;
+let adTimerInterval = null;
+let adDuration = 5; // сколько секунд нельзя пропустить
+
+// ── Частицы ──
+function spawnParticles() {
+  const c = document.getElementById('particles');
+  const colors = ['#00ff88', '#a855f7', '#3b82f6'];
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `left:${Math.random()*100}%;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*15}s;width:${1+Math.random()*3}px;height:${1+Math.random()*3}px;background:${colors[Math.floor(Math.random()*3)]};`;
+    c.appendChild(p);
+  }
+}
+
+// ── Серверы ──
+function renderServers() {
+  document.getElementById('serverList').innerHTML = SERVERS.map((s, i) => `
+    <div class="server-item ${i===selectedServer?'active':''}" onclick="selectServer(${i})">
+      <span class="server-flag">${s.flag}</span>
+      <div class="server-info">
+        <div class="server-name">${s.name}</div>
+        <div class="server-desc">${s.desc}</div>
+      </div>
+      <div class="server-ping ${s.bad?'bad':''}">${s.ping < 0 ? s.ping+' мс ⚡' : s.ping+' мс'}</div>
+    </div>
+  `).join('');
+}
+function selectServer(i) {
+  selectedServer = i;
+  renderServers();
+  showToast('✅ ' + SERVERS[i].flag + ' ' + SERVERS[i].name);
+  if (isConnected) updateStats();
+  if (tg) tg.HapticFeedback?.selectionChanged();
+}
+
+// ── Подключение ──
+function handleConnect() {
+  if (isConnected) { disconnect(); return; }
+  showAd();
+}
+
+function connect() {
+  isConnected = true;
+  const ind = document.getElementById('statusIndicator');
+  ind.className = 'status-indicator on';
+  ind.innerHTML = '<div class="ring"></div><div class="ring"></div><span>🟢</span>';
+  document.getElementById('statusLabel').textContent = 'ПОДКЛЮЧЁН';
+  document.getElementById('statusLabel').className = 'status-label on';
+  document.getElementById('statusSub').textContent = 'Анонимен как сыщик в маске 🕵️';
+  const btn = document.getElementById('btnConnect');
+  btn.textContent = '🔌 ОТКЛЮЧИТЬСЯ';
+  btn.className = 'btn-connect on';
+  updateStats();
+  statsInterval = setInterval(updateStats, 3000);
+  showToast('🟢 Подключён: ' + SERVERS[selectedServer].flag + ' ' + SERVERS[selectedServer].name);
+  if (tg) tg.HapticFeedback?.notificationOccurred('success');
+}
+
+function disconnect() {
+  isConnected = false;
+  clearInterval(statsInterval);
+  const msgs = ['👁️ Провайдер снова за тобой. Привет!', '😢 Сервер заплакал', '🕵️ ФСБ снова в деле. Удачи.', '📡 Сигнал улетел'];
+  const ind = document.getElementById('statusIndicator');
+  ind.className = 'status-indicator off';
+  ind.innerHTML = '<div class="ring"></div><span>🔴</span>';
+  document.getElementById('statusLabel').textContent = 'НЕ ПОДКЛЮЧЁН';
+  document.getElementById('statusLabel').className = 'status-label off';
+  document.getElementById('statusSub').textContent = msgs[Math.floor(Math.random()*msgs.length)];
+  const btn = document.getElementById('btnConnect');
+  btn.textContent = '🔌 ПОДКЛЮЧИТЬСЯ';
+  btn.className = 'btn-connect off';
+  ['statPing','statDown','statBlocked'].forEach(id => document.getElementById(id).textContent = '—');
+  document.getElementById('statIP').textContent = '—.—.—.—';
+  showToast('🔴 Отключён. Удачи с анонимностью.');
+  if (tg) tg.HapticFeedback?.notificationOccurred('warning');
+}
+
+function updateStats() {
+  const s = SERVERS[selectedServer];
+  document.getElementById('statPing').textContent = (s.ping + Math.floor(Math.random()*20-10)) + ' мс';
+  document.getElementById('statDown').textContent = (Math.random()*500).toFixed(1) + ' МБ';
+  document.getElementById('statBlocked').textContent = Math.floor(Math.random()*9999).toLocaleString();
+  document.getElementById('statIP').textContent = [1,2,3,4].map(()=>Math.floor(Math.random()*255)).join('.');
+}
+
+// ════════════════════════════════════════════════
+//  ВИДЕО-РЕКЛАМА
+// ════════════════════════════════════════════════
+function showAd() {
+  const overlay  = document.getElementById('adOverlay');
+  const video    = document.getElementById('adVideo');
+  const fallback = document.getElementById('adFallback');
+  const progress = document.getElementById('adProgress');
+  const skipBtn  = document.getElementById('btnSkip');
+  const timerEl  = document.getElementById('adTimer');
+
+  overlay.classList.add('show');
+  skipBtn.disabled = true;
+  progress.style.width = '0%';
+
+  if (ADS_VIDEOS.length > 0) {
+    const file = ADS_VIDEOS[Math.floor(Math.random() * ADS_VIDEOS.length)];
+    const ext = file.split('.').pop().toLowerCase();
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+    const imgEl = document.getElementById('adImage');
+
+    fallback.classList.remove('show');
+
+    if (isImage) {
+      // ── Картинка ──
+      video.style.display = 'none';
+      imgEl.style.display = 'block';
+      imgEl.src = file;
+      adDuration = 5;
+      startAdTimer(adDuration, () => {
+        skipBtn.disabled = false;
+        timerEl.textContent = 'Skip';
+      }, progress, timerEl);
+      imgEl.onerror = () => { imgEl.style.display = 'none'; showFallbackAd(video, fallback, progress, skipBtn, timerEl); };
+    } else {
+      // ── Видео ──
+      imgEl.style.display = 'none';
+      video.style.display = 'block';
+      video.src = file;
+      video.muted = false;
+      video.load();
+      video.play().catch(() => { video.muted = true; video.play(); });
+      video.onloadedmetadata = () => {
+        adDuration = Math.min(Math.ceil(video.duration), 10);
+        startAdTimer(adDuration, () => {
+          skipBtn.disabled = false;
+          timerEl.textContent = 'Skip';
+        }, progress, timerEl);
+      };
+      video.onerror = () => showFallbackAd(video, fallback, progress, skipBtn, timerEl);
+    }
+  } else {
+    // ── Нет видео — текстовая заглушка ──
+    video.style.display = 'none';
+    showFallbackAd(video, fallback, progress, skipBtn, timerEl);
+  }
+
+  if (tg) tg.HapticFeedback?.impactOccurred('medium');
+}
+
+function showFallbackAd(video, fallback, progress, skipBtn, timerEl) {
+  video.style.display = 'none';
+  const ad = ADS_FALLBACK[Math.floor(Math.random() * ADS_FALLBACK.length)];
+  document.getElementById('fallbackEmoji').textContent = ad.emoji;
+  document.getElementById('fallbackTitle').textContent = ad.title;
+  document.getElementById('fallbackText').textContent  = ad.text;
+  fallback.classList.add('show');
+  adDuration = 5;
+  startAdTimer(adDuration, () => {
+    skipBtn.disabled = false;
+    timerEl.textContent = '▶️ Пропустить';
+  }, progress, timerEl);
+}
+
+function startAdTimer(seconds, onDone, progressEl, timerEl) {
+  clearInterval(adTimerInterval);
+  let elapsed = 0;
+  const total = seconds * 10; // тики по 100мс
+  timerEl.textContent = '⏳ ' + seconds;
+  adTimerInterval = setInterval(() => {
+    elapsed++;
+    const pct = (elapsed / total) * 100;
+    progressEl.style.width = pct + '%';
+    const secsLeft = seconds - Math.floor(elapsed / 10);
+    if (secsLeft > 0) timerEl.textContent = '⏳ ' + secsLeft;
+    if (elapsed >= total) {
+      clearInterval(adTimerInterval);
+      onDone();
+    }
+  }, 100);
+}
+
+function closeAd() {
+  const overlay = document.getElementById('adOverlay');
+  const video = document.getElementById('adVideo');
+  overlay.classList.remove('show');
+  video.pause();
+  video.src = '';
+  document.getElementById('adImage').style.display = 'none';
+  document.getElementById('adImage').src = '';
+  clearInterval(adTimerInterval);
+  connect();
+}
+
+// ── Навигация ──
+function showPage(page) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const cap = page.charAt(0).toUpperCase() + page.slice(1);
+  document.getElementById('page' + cap).classList.add('active');
+  document.getElementById('nav'  + cap).classList.add('active');
+  if (page === 'servers') renderServers();
+  if (tg) tg.HapticFeedback?.selectionChanged();
+}
+
+// ── Тост ──
+let toastTimeout;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function buyPremium() {
+  if (tg) tg.HapticFeedback?.notificationOccurred('error');
+  showToast('💔 Платёжная система тоже анонимная — мы её не нашли');
+}
+
+// ── Инит ──
+spawnParticles();
+renderServers();
+</script>
+</body>
+</html>
 Code  Blame  618 lines ...    [Raw] [📋] [⬇️] [✏️] [...]
                                                     ^^^
                                                   ВОТ ЭТА
