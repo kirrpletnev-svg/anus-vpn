@@ -384,9 +384,8 @@ if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#0a0a0f'); tg.setBackgroun
 // video/mov = воспроизводится как видео
 // jpg/png/gif = показывается как картинка
 const ADS_VIDEOS = [
-  "https://raw.githubusercontent.com/kirrpletnev-svg/anus-vpn/main/RickRoll'D.mp4",
-  "https://raw.githubusercontent.com/kirrpletnev-svg/anus-vpn/main/kenix.mp4",
-  "https://files.catbox.moe/pd2afi.MOV",
+  "https://kirrpletnev-svg.github.io/anus-vpn/RickRoll%27D.mp4",
+  "https://kirrpletnev-svg.github.io/anus-vpn/kenix.mp4",
   "https://files.catbox.moe/ir2g3u.mp4",
   "https://files.catbox.moe/fgccmh.mp4",
   "https://files.catbox.moe/x4e085.jpg",
@@ -541,7 +540,6 @@ function showAd() {
       // ── Видео ──
       imgEl.style.display = 'none';
       video.style.display = 'block';
-      video.crossOrigin = 'anonymous';
       video.src = file;
       video.muted = true;
       video.load();
