@@ -270,9 +270,12 @@
 
   <!-- Низ -->
   <div class="ad-bottom-bar">
-    <button class="btn-skip" id="btnSkip" disabled onclick="closeAd()">
-      ⏭ Пропустить рекламу
-    </button>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <button onclick="toggleMute()" id="btnMute" style="padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:#fff;font-size:18px;cursor:pointer;">🔇</button>
+      <button class="btn-skip" id="btnSkip" disabled onclick="closeAd()" style="flex:1;">
+        ⏭ Пропустить рекламу
+      </button>
+    </div>
   </div>
 </div>
 
@@ -607,6 +610,13 @@ function startAdTimer(seconds, onDone, progressEl, timerEl) {
       onDone();
     }
   }, 100);
+}
+
+function toggleMute() {
+  const video = document.getElementById('adVideo');
+  const btn = document.getElementById('btnMute');
+  video.muted = !video.muted;
+  btn.textContent = video.muted ? '🔇' : '🔊';
 }
 
 function closeAd() {
