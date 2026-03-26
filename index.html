@@ -563,13 +563,13 @@ function showAd() {
       video.onplaying = () => startTimer(10);
       video.onerror = () => { video.style.display = 'none'; showFallbackAd(video, fallback, progress, skipBtn, timerEl); };
 
-      // Если через 4 сек ничего не произошло — показываем заглушку
+      // Если через 15 сек ничего не произошло — показываем заглушку
       setTimeout(() => {
         if (!timerStarted) {
           video.style.display = 'none';
           showFallbackAd(video, fallback, progress, skipBtn, timerEl);
         }
-      }, 4000);
+      }, 15000);
     }
   } else {
     // ── Нет видео — текстовая заглушка ──
